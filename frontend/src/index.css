@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #0f1c14;
+  --color-forest: #1b4332;
+  --color-leaf: #2d6a4f;
+  --color-mint: #95d5b2;
+  --color-fog: #fdf5f6;
+  --color-sand: #f1dce2;
+  --color-amber: #d97706;
+  --color-danger: #b91c1c;
+  /* Public / auth brand palette */
+  --color-blush: #fbeef1;
+  --color-plum: #3d0e28;
+  --color-plum-deep: #280a1a;
+  --color-rose: #ff3e76;
+  --color-rose-deep: #e01f58;
+  --color-rose-soft: #ffd6e2;
+  --color-wine: #2b1420;
+  --color-mauve: #8a6474;
+  --color-blush-line: #f1dce2;
+  --color-footer: #210711;
+  /* Home page (Grofresh-style) palette — scoped to HomePage only */
+  --color-home-forest: #3d0e28;
+  --color-home-leaf: #ff3e76;
+  --color-home-mint: #ffd6e2;
+  --color-home-sand: #fbeef1;
+  --color-home-line: #f6dde5;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-fog text-ink font-sans antialiased;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 10% -10%, rgba(255, 62, 118, 0.1), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(61, 14, 40, 0.08), transparent);
+  }
+}

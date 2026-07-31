@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+.env
+*.log
+.DS_Store
+backend/src/uploads/products/*
+!backend/src/uploads/products/.gitkeep
+backend/src/uploads/*
+!backend/src/uploads/.gitkeep
+.vite/
+coverage/
