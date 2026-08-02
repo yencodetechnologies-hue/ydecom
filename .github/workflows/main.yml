@@ -1,0 +1,42 @@
+name: Deploy YDecom
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd ~/ydecom/ydecom
+
+            git pull origin main
+
+            # Backend
+            cd backend
+            npm install
+
+            pm2 restart ydecom || pm2 start src/server.js --name ydecom
+
+            # Frontend
+            cd ../frontend
+            npm install
+            npm run build
+
+            sudo rm -rf /var/www/ydecom/*
+            sudo cp -r dist/* /var/www/ydecom/
+
+            sudo systemctl reload nginx
