@@ -1,4 +1,4 @@
-name: Deploy YDecom
+name: YDecom Backend CI/CD
 
 on:
   push:
@@ -6,37 +6,61 @@ on:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Source
+      - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm install
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT }}
-          script: |
-            cd ~/ydecom/ydecom
 
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+
+          script: |
+            cd ~/ydecom/ydecom/backend
+
+            echo "📥 Pulling latest code..."
             git pull origin main
 
-            # Backend
-            cd backend
+            echo "⚙️ Loading Node via NVM..."
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            nvm use 20
+
+            echo "📦 Installing dependencies..."
             npm install
 
-            pm2 restart ydecom || pm2 start src/server.js --name ydecom
+            echo "🚀 Starting or Restarting PM2..."
 
-            # Frontend
-            cd ../frontend
-            npm install
-            npm run build
+            pm2 describe ydecom > /dev/null
+            if [ $? -eq 0 ]; then
+              echo "♻️ Restarting existing app"
+              pm2 restart ydecom
+            else
+              echo "🆕 Starting new app"
+              pm2 start src/server.js --name ydecom
+            fi
 
-            sudo rm -rf /var/www/ydecom/*
-            sudo cp -r dist/* /var/www/ydecom/
-
-            sudo systemctl reload nginx
+            echo "💾 Saving PM2 process list..."
+            pm2 save
